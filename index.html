@@ -1,12 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Ranade&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Tracker</title>
+
+<style>
+/* === BODY === */
+body {
+  font-family: 'Ranade', sans-serif;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  background-image: url('https://t3.ftcdn.net/jpg/13/73/83/08/360_F_1373830835_pbaKPsXsqoJvULx7dZNsBgmVXBNG3YiW.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+}
+
+/* === CONTAINER === */
+.container {
+  width: 900px;
+  max-width: 95%;
+  padding: 60px 20px;
+  z-index: 2;
+  position: relative;
+}
+
+/* === TITLE === */
+h1 {
+  text-align: center;
+  font-size: 70px;
+  margin-bottom: 40px;
+}
+
+/* === CLICKABLE TITLE === */
+.title-link {
+  color: white;
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.title-link::after,
+.title-link::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, #2563eb, #1e40af);
+  left: 0;
+  transform: scaleX(0);
+  transition: transform 0.4s ease-out;
+}
+
+.title-link::after { bottom: -8px; transform-origin: right; }
+.title-link::before { top: -8px; transform-origin: left; }
+
+.title-link:hover::after,
+.title-link:hover::before { transform: scaleX(1); }
+
+.title-link:hover {
+  text-shadow: 0 0 10px rgba(37, 99, 235, 0.8),
+               0 0 20px rgba(30, 64, 175, 0.6);
+}
+
+.title-link:active {
+  transform: scale(0.96);
+  text-shadow: 0 0 5px rgba(37, 99, 235, 0.6);
+}
+
+/* === SECTIONS === */
+.summary, .form, .transactions {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 30px;
+}
+
+/* === TOTALS === */
+.totals { display: flex; gap: 15px; }
+.totals p {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* === INPUTS === */
+input, select {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+input[type="number"]::-webkit-inner-spin-button { opacity: 1; filter: invert(1); }
+
+select option { background: #111; color: white; }
+
+button {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  cursor: pointer;
+}
+
+ul { list-style: none; padding: 0; }
+
+li {
+  background: rgba(255,255,255,0.08);
+  padding: 14px;
+  border-radius: 12px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.income { border-left: 5px solid #10b981; }
+.expense { border-left: 5px solid #ef4444; }
+
+/* === HOLOGRAPHIC HOVER === */
+.holographic-hover {
+  position: relative;
+  overflow: hidden;
+  transition: 0.5s;
+}
+.holographic-hover::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(0deg, transparent, transparent 30%, rgba(0,255,255,0.3));
+  transform: rotate(-45deg);
+  opacity: 0;
+}
+.holographic-hover:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0,255,255,0.4); }
+.holographic-hover:hover::before { opacity: 1; transform: rotate(-45deg) translateY(100%); }
+
+/* === LEFT & RIGHT 3D CUBES BACKGROUND === */
+.cube-background {
+  position: fixed;
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  transform-style: preserve-3d;
+  animation: rotateCube 15s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.left-cube { left: 10%; transform: translate(0, -50%); }
+.right-cube { right: 10%; left: auto; transform: translate(0, -50%); }
+
+.face {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: #000;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  font-weight: bold;
+  color: #10b981;
+}
+
+.front  { transform: rotateY(0) translateZ(100px); }
+.back   { transform: rotateY(180deg) translateZ(100px); }
+.right  { transform: rotateY(90deg) translateZ(100px); }
+.left   { transform: rotateY(-90deg) translateZ(100px); }
+.top    { transform: rotateX(90deg) translateZ(100px); }
+.bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+@keyframes rotateCube {
+  from { transform: rotateX(0deg) rotateY(0deg); }
+  to   { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+/* === FORCE INPUT TEXT WHITE === */
+input { color: white !important; }
+input[type="number"] { color: white !important; }
+input::placeholder { color: #ffffff; opacity: 1; }
+
+/* === NEW SKEWED ANIMATED CUBES === */
+.animated-cubes-container {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%) skewY(-20deg);
+  animation: animateHue 5s linear infinite;
+  z-index: 1;
+}
+.animated-cubes-container .cube {
+  position: relative;
+  z-index: 2;
+}
+.animated-cubes-container .cube:nth-child(2) { z-index: 1; transform: translate(-60px, -60px); }
+.animated-cubes-container .cube:nth-child(3) { z-index: 3; transform: translate(60px, 60px); }
+.animated-cubes-container .cube div {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  translate: calc(-70px * var(--x)) calc(-60px * var(--y));
+}
+.animated-cubes-container .cube div span {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  background: #dcdcdc;
+  z-index: calc(1 * var(--i));
+  transition: 1.5s;
+}
+.animated-cubes-container .cube div span:hover {
+  transition: 0s;
+  background: #ef4149;
+  filter: drop-shadow(0 0 30px #ef4149);
+}
+.animated-cubes-container .cube div span::before {
+  content: "";
+  position: absolute;
+  left: -40px;
+  width: 40px;
+  height: 100%;
+  background: #fff;
+  transform-origin: right;
+  transform: skewY(45deg);
+  transition: 1.5s;
+}
+.animated-cubes-container .cube div span::after {
+  content: "";
+  position: absolute;
+  top: -40px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: #f2f2f2;
+  transform-origin: bottom;
+  transform: skewX(45deg);
+  transition: 1.5s;
+}
+
+@keyframes animateHue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+
+</style>
 </head>
+
 <body>
-    <h1>Killians first website</h1>
-    
-</body>
-</html>
+
+<div class="container">
+  <h1>
+    <a href="https://www.linkedin.com/in/killian-sobol-9b08513a7/" target="_blank" class="title-link">
+      Budget Tracker
+    </a>
+  </h1>
+
+  <div class="summary holographic-hover">
+    <h2>Balance: $0</h2>
+    <div class="totals">
+      <p>Income: $0</p>
+      <p>Expenses: $0</p>
+    </div>
+  </div>
+
+  <div class="form holographic-hover">
+    <h3>Add Transaction</h3>
+    <input type="text" placeholder="Description">
+    <input type="number" placeholder="Amount">
+    <select>
+      <option disabled selected>Select a category</option>
+      <option>Food</option>
+      <option>Housing</option>
+      <option>Transportation</option>
+      <option>Entertainment</option>
+      <option>Utilities</option>
+      <option>Shopping</option>
+      <option>Health</option>
+      <option>Other</option>
+    </select>
+    <button>Add</button>
+  </div>
+<!-- LEFT CUBE -->
+<div class="cube-background left-cube">
+  <div class="face front">$</div>
+  <div class="face back">$</div>
+  <div class="face right">$</div>
+  <div class="face left">$</div>  
+  <div class="face top">$</div>
+  <div class="face bottom">$</div>
+</div>
+
+<!-- RIGHT CUBE -->
+<div class="cube-background right-cube">
+  <div class="face front">$</div>
+  <div class="face back">$</div>
+  <div class="face right">$</div>
+  <div class="face left">$</div>
+  <div class="face top">$</div>
+  <div class="face bottom">$</div>
+</div>
