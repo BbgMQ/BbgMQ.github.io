@@ -158,7 +158,12 @@ li {
   transform-style: preserve-3d;
   animation: rotateCube 15s linear infinite;
   z-index: -1;
-  pointer-events: none;
+  /* allow mouse interactions */
+  pointer-events: all;
+  cursor: grab;
+}
+.cube-background:active {
+  cursor: grabbing;
 }
 
 .left-cube { left: 10%; transform: translate(0, -50%); }
@@ -196,68 +201,6 @@ input { color: white !important; }
 input[type="number"] { color: white !important; }
 input::placeholder { color: #ffffff; opacity: 1; }
 
-/* === NEW SKEWED ANIMATED CUBES === */
-.animated-cubes-container {
-  position: absolute;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%) skewY(-20deg);
-  animation: animateHue 5s linear infinite;
-  z-index: 1;
-}
-.animated-cubes-container .cube {
-  position: relative;
-  z-index: 2;
-}
-.animated-cubes-container .cube:nth-child(2) { z-index: 1; transform: translate(-60px, -60px); }
-.animated-cubes-container .cube:nth-child(3) { z-index: 3; transform: translate(60px, 60px); }
-.animated-cubes-container .cube div {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  translate: calc(-70px * var(--x)) calc(-60px * var(--y));
-}
-.animated-cubes-container .cube div span {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 50px;
-  background: #dcdcdc;
-  z-index: calc(1 * var(--i));
-  transition: 1.5s;
-}
-.animated-cubes-container .cube div span:hover {
-  transition: 0s;
-  background: #ef4149;
-  filter: drop-shadow(0 0 30px #ef4149);
-}
-.animated-cubes-container .cube div span::before {
-  content: "";
-  position: absolute;
-  left: -40px;
-  width: 40px;
-  height: 100%;
-  background: #fff;
-  transform-origin: right;
-  transform: skewY(45deg);
-  transition: 1.5s;
-}
-.animated-cubes-container .cube div span::after {
-  content: "";
-  position: absolute;
-  top: -40px;
-  left: 0;
-  width: 100%;
-  height: 40px;
-  background: #f2f2f2;
-  transform-origin: bottom;
-  transform: skewX(45deg);
-  transition: 1.5s;
-}
-
-@keyframes animateHue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-
 </style>
 </head>
 
@@ -271,18 +214,20 @@ input::placeholder { color: #ffffff; opacity: 1; }
   </h1>
 
   <div class="summary holographic-hover">
-    <h2>Balance: $0</h2>
+    <h2 id="balanceDisplay">Balance: $0</h2>
+    <input type="number" id="startingBalance" placeholder="Set starting balance">
+    <button id="setBalanceBtn">Set Balance</button>
     <div class="totals">
-      <p>Income: $0</p>
-      <p>Expenses: $0</p>
+      <p id="incomeDisplay">Income: $0</p>
+      <p id="expensesDisplay">Expenses: $0</p>
     </div>
   </div>
 
   <div class="form holographic-hover">
     <h3>Add Transaction</h3>
-    <input type="text" placeholder="Description">
-    <input type="number" placeholder="Amount">
-    <select>
+    <input type="text" placeholder="Description" id="descInput">
+    <input type="number" placeholder="Amount" id="amountInput">
+    <select id="categorySelect">
       <option disabled selected>Select a category</option>
       <option>Food</option>
       <option>Housing</option>
@@ -293,37 +238,39 @@ input::placeholder { color: #ffffff; opacity: 1; }
       <option>Health</option>
       <option>Other</option>
     </select>
-    <button>Add</button>
+    <button id="addBtn">Add</button>
   </div>
 
-  <!-- ✅ ADDED: TRANSACTIONS SECTION -->
   <div class="transactions holographic-hover">
     <h3>Transactions</h3>
-    <ul></ul>
+    <ul id="transactionList"></ul>
   </div>
 
-<!-- LEFT  DIDDY CUBE -->
-<div class="cube-background left-cube">
-  <div class="face front">$</div>
-  <div class="face back">$</div>
-  <div class="face right">$</div>
-  <div class="face left">$</div>  
-  <div class="face top">$</div>
-  <div class="face bottom">$</div>
+  <<!-- LEFT CUBE WRAPPER -->
+<div class="cube-wrapper">
+  <div class="cube-background left-cube">
+    <div class="face front">$</div>
+    <div class="face back">$</div>
+    <div class="face right">$</div>
+    <div class="face left">$</div>  
+    <div class="face top">$</div>
+    <div class="face bottom">$</div>
+  </div>
 </div>
 
-<!-- RIGHT  DIDDY CUBE -->
-<div class="cube-background right-cube">
-  <div class="face front">$</div>
-  <div class="face back">$</div>
-  <div class="face right">$</div>
-  <div class="face left">$</div>
-  <div class="face top">$</div>
-  <div class="face bottom">$</div>
+  <!-- RIGHT CUBE WRAPPER -->
+<div class="cube-wrapper">
+  <div class="cube-background right-cube">
+    <div class="face front">$</div>
+    <div class="face back">$</div>
+    <div class="face right">$</div>
+    <div class="face left">$</div>
+    <div class="face top">$</div>
+    <div class="face bottom">$</div>
+  </div>
 </div>
 
-<!-- ✅ ADDED: JS LINK -->
 <script src="script.js"></script>
-
+</div>
 </body>
 </html>
