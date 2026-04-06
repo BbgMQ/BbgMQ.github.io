@@ -1,30 +1,74 @@
-const descriptionInput = document.querySelector('input[type="text"]');
-const amountInput = document.querySelector('.form input[type="number"]');
-const categorySelect = document.querySelector('select');
-const addButton = document.querySelector('.form button');
-const transactionList = document.createElement('ul');
+// Budget Tracker - simplified and fixed pie-chart input handling
 
-document.querySelector('.transactions')?.appendChild(transactionList);
+// Selectors
+const descriptionInput = document.getElementById('descInput');
+const amountInput = document.getElementById('amountInput');
+const typeSelect = document.getElementById('typeSelect');
+const categorySelect = document.getElementById('categorySelect');
+const addButton = document.getElementById('addBtn');
+const transactionList = document.getElementById('transactionList');
 
 let transactions = [];
 
-// ✅ STARTING BALANCE
-let startingBalance = 0;
-const startingBalanceInput = document.getElementById("startingBalance");
-const setBalanceBtn = document.getElementById("setBalanceBtn");
+// Category color mapping (rendered into the key)
+const CATEGORY_COLORS = {
+  Food: '#4e79a7',
+  Housing: '#f28e2c',
+  Transportation: '#e15759',
+  Entertainment: '#76b7b2',
+  Utilities: '#59a14f',
+  Shopping: '#edc949',
+  Health: '#af7aa1',
+  Other: '#ff9f40'
+};
 
-setBalanceBtn.addEventListener("click", () => {
+// Starting balance
+let startingBalance = 0;
+const startingBalanceInput = document.getElementById('startingBalance');
+const setBalanceBtn = document.getElementById('setBalanceBtn');
+
+setBalanceBtn.addEventListener('click', () => {
   const value = parseFloat(startingBalanceInput.value);
   if (isNaN(value)) {
-    alert("Enter a valid number");
+    alert('Enter a valid number');
     return;
   }
   startingBalance = value;
-  startingBalanceInput.value = "";
+  startingBalanceInput.value = '';
   updateUI();
 });
 
-// UPDATE UI
+// Add transaction
+function addTransaction() {
+  const description = descriptionInput.value.trim();
+  const rawAmount = amountInput.value.trim();
+  const amount = parseFloat(rawAmount);
+  const type = typeSelect.value;
+  const category = categorySelect.value;
+
+  if (!description || isNaN(amount) || !type || category === 'Select a category') {
+    alert('Please fill out all fields correctly.');
+    return;
+  }
+
+  // Normalize sign: Income -> positive, Expense -> negative
+  const signedAmount = type === 'Expense' ? -Math.abs(amount) : Math.abs(amount);
+
+  transactions.push({ description, amount: signedAmount, category, type });
+
+  descriptionInput.value = '';
+  amountInput.value = '';
+  typeSelect.selectedIndex = 0;
+  categorySelect.selectedIndex = 0;
+
+  updateUI();
+}
+
+addButton.addEventListener('click', addTransaction);
+amountInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTransaction(); });
+descriptionInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTransaction(); });
+
+// Update UI
 function updateUI() {
   let balance = startingBalance;
   let income = 0;
@@ -35,46 +79,94 @@ function updateUI() {
   transactions.forEach(t => {
     const li = document.createElement('li');
     li.classList.add(t.amount >= 0 ? 'income' : 'expense');
-
-    li.innerHTML = `
-      ${t.description} (${t.category}) 
-      <span>$${t.amount}</span>
-    `;
-
+    li.innerHTML = `${t.description} (${t.category}) <span>$${Math.abs(t.amount)}</span>`;
     transactionList.appendChild(li);
 
     balance += t.amount;
-
     if (t.amount >= 0) income += t.amount;
     else expenses += Math.abs(t.amount);
   });
 
-  document.querySelector('.summary h2').textContent = `Balance: $${balance}`;
-  document.querySelectorAll('.totals p')[0].textContent = `Income: $${income}`;
-  document.querySelectorAll('.totals p')[1].textContent = `Expenses: $${expenses}`;
+  document.getElementById('balanceDisplay').textContent = `Balance: $${balance}`;
+  document.getElementById('incomeDisplay').textContent = `Income: $${income}`;
+  document.getElementById('expensesDisplay').textContent = `Expenses: $${expenses}`;
+
+  updatePieChart();
 }
 
-// ADD TRANSACTION
-addButton.addEventListener('click', () => {
-  const description = descriptionInput.value.trim();
-  const amount = parseFloat(amountInput.value);
-  const category = categorySelect.value;
+// CSS-based pie chart update
+function updatePieChart() {
+  const chart = document.getElementById('spendingPie');
+  const legend = document.getElementById('pieLegend');
+  const centerMsg = document.getElementById('pieCenter');
+  if (!chart) return;
 
-  if (!description || isNaN(amount) || category === "Select a category") {
-    alert("Please fill out all fields correctly.");
+  const totals = {};
+  let totalExpenses = 0;
+
+  transactions.forEach(t => {
+    if (t.amount < 0) {
+      if (!totals[t.category]) totals[t.category] = 0;
+      totals[t.category] += Math.abs(t.amount);
+      totalExpenses += Math.abs(t.amount);
+    }
+  });
+
+  if (totalExpenses === 0) {
+    chart.style.background = `\n      radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),\n      conic-gradient(#444 0% 100%)\n    `;
+    if (legend) legend.innerHTML = '';
+    if (centerMsg) { centerMsg.style.display = 'block'; centerMsg.textContent = 'No expenses yet'; }
     return;
   }
+  if (centerMsg) centerMsg.style.display = 'none';
 
-  transactions.push({ description, amount, category });
+  const colors = CATEGORY_COLORS;
 
-  descriptionInput.value = '';
-  amountInput.value = '';
-  categorySelect.selectedIndex = 0;
+  let startPercent = 0;
+  let gradientStr = '';
+  let legendHTML = '';
 
-  updateUI();
-});
+  Object.keys(totals).forEach((cat, index, arr) => {
+    const percent = (totals[cat] / totalExpenses) * 100;
+    const endPercent = startPercent + percent;
 
-// === INTERACTIVE CUBES WITH FULL MOUSE CONTROL ===
+    gradientStr += `${colors[cat] || '#ccc'} ${startPercent}% ${endPercent}%`;
+    if (index < arr.length - 1) gradientStr += ', ';
+
+    legendHTML += `<span class="legend-item"><span class="legend-swatch" style="background:${colors[cat] || '#ccc'}"></span>${cat} ${Math.round(percent)}%</span>`;
+    startPercent = endPercent;
+  });
+
+  chart.style.background = `\n    radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),\n    conic-gradient(${gradientStr})\n  `;
+
+  if (legend) legend.innerHTML = legendHTML;
+}
+
+// Render the persistent color key (shows what color corresponds to which category)
+function renderColorKey() {
+  const keyContainer = document.getElementById('pieKey');
+  if (!keyContainer) return;
+  keyContainer.innerHTML = '';
+
+  Object.keys(CATEGORY_COLORS).forEach(cat => {
+    const item = document.createElement('div');
+    item.className = 'item';
+
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.style.background = CATEGORY_COLORS[cat];
+
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = cat;
+
+    item.appendChild(swatch);
+    item.appendChild(label);
+    keyContainer.appendChild(item);
+  });
+}
+
+// Interactive cubes (unchanged)
 const cubeWrappers = document.querySelectorAll('.cube-wrapper');
 
 cubeWrappers.forEach(wrapper => {
@@ -84,7 +176,6 @@ cubeWrappers.forEach(wrapper => {
   let currentX = 0;
   let currentY = 0;
 
-  // Store initial animation
   const originalAnimation = cube.style.animation;
 
   wrapper.addEventListener('mousedown', e => {
@@ -93,16 +184,7 @@ cubeWrappers.forEach(wrapper => {
     startY = e.clientY;
     document.body.style.userSelect = 'none';
 
-    // Stop CSS animation completely
     cube.style.animation = 'none';
-
-    // Prevent dollar sign text selection
-    cube.querySelectorAll('.face').forEach(face => {
-      face.style.userSelect = 'none';
-      face.style.webkitUserSelect = 'none';
-      face.style.mozUserSelect = 'none';
-      face.style.msUserSelect = 'none';
-    });
   });
 
   document.addEventListener('mousemove', e => {
@@ -111,12 +193,10 @@ cubeWrappers.forEach(wrapper => {
     let deltaX = e.clientX - startX;
     let deltaY = e.clientY - startY;
 
-    // Adjust sensitivity (slower rotation)
-    const sensitivity = 0.03; // lower number = slower
+    const sensitivity = 0.03;
     currentY += deltaX * sensitivity;
     currentX -= deltaY * sensitivity;
 
-    // Apply transform
     cube.style.transform = `translate(0, -50%) rotateX(${currentX}deg) rotateY(${currentY}deg)`;
   });
 
@@ -125,6 +205,12 @@ cubeWrappers.forEach(wrapper => {
     isDragging = false;
     document.body.style.userSelect = 'auto';
 
-      cube.style.animation = originalAnimation;
-    }, 3000); // 3000ms = 3 seconds
+    cube.style.animation = originalAnimation;
   });
+});
+
+// Init
+window.addEventListener('load', () => {
+  renderColorKey();
+  updateUI();
+});

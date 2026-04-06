@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Ranade&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -81,6 +82,10 @@ h1 {
   border-radius: 16px;
   backdrop-filter: blur(10px);
   margin-bottom: 30px;
+  position: relative;
+  overflow: visible;
+  padding-right: 320px;
+  min-height: 240px;
 }
 
 /* === TOTALS === */
@@ -200,11 +205,130 @@ li {
 input { color: white !important; }
 input[type="number"] { color: white !important; }
 input::placeholder { color: #ffffff; opacity: 1; }
+.chart-box {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 260px;
+  height: 260px;
+  z-index: 10;
+}
 
+.chart-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.pie-chart {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),
+              conic-gradient(#444 0% 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: sans-serif;
+  z-index: 10;
+}
+
+.pie-chart h2 {
+  position: absolute;
+  top: 10px;
+  text-align: center;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.pie-chart figcaption {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: smaller;
+  text-align: right;
+}
+
+.pie-chart cite {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  font-size: 70%;
+  color: gray;
+}
+
+.pie-chart span:after {
+  display: inline-block;
+  content: "";
+  width: 0.6em;
+  height: 0.6em;
+  margin-left: 0.3em;
+  border-radius: 0.2em;
+  background: currentColor;
+}
+.pie-chart {
+  background:
+    radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),
+    conic-gradient(#444 0% 100%);
+  border-radius: 50%;
+  display: block;
+}
+.pie-key {
+  position: absolute;
+  top: 10px;
+  right: -200px;
+  background: rgba(0,0,0,0.35);
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.8rem;
+  width: max-content;
+}
+.pie-key .item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.pie-key .swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.pie-key .label { white-space: nowrap; }
+.pie-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: black;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+.pie-chart figcaption span:after {
+  display: inline-block;
+  content: "";
+  width: 0.8em;
+  height: 0.8em;
+  margin-left: 0.4em;
+  border-radius: 0.2em;
+  background: currentColor;
+}
+/* legend shown at bottom of the summary box */
+#pieLegend {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: black;
+  text-align: center;
+  font-size: 0.9rem;
+  z-index: 11;
+  width: calc(100% - 40px);
+}
+#pieLegend .legend-item { display: inline-block; margin: 6px 8px; vertical-align: middle; }
+#pieLegend .legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
 </style>
 </head>
 
 <body>
+<!-- pie/key moved into the summary box so it fits in the middle area -->
+
 
 <div class="container">
   <h1>
@@ -215,18 +339,28 @@ input::placeholder { color: #ffffff; opacity: 1; }
 
   <div class="summary holographic-hover">
     <h2 id="balanceDisplay">Balance: $0</h2>
+    <figure id="spendingPie" class="pie-chart">
+      <div id="pieCenter" class="pie-center">No expenses yet</div>
+    </figure>
+    <div id="pieKey" class="pie-key" aria-label="Category color key"></div>
     <input type="number" id="startingBalance" placeholder="Set starting balance">
     <button id="setBalanceBtn">Set Balance</button>
     <div class="totals">
       <p id="incomeDisplay">Income: $0</p>
       <p id="expensesDisplay">Expenses: $0</p>
     </div>
+    <div id="pieLegend"></div>
   </div>
 
   <div class="form holographic-hover">
     <h3>Add Transaction</h3>
     <input type="text" placeholder="Description" id="descInput">
     <input type="number" placeholder="Amount" id="amountInput">
+    <select id="typeSelect">
+      <option disabled selected>Type</option>
+      <option>Income</option>
+      <option>Expense</option>
+    </select>
     <select id="categorySelect">
       <option disabled selected>Select a category</option>
       <option>Food</option>
@@ -246,7 +380,7 @@ input::placeholder { color: #ffffff; opacity: 1; }
     <ul id="transactionList"></ul>
   </div>
 
-  <<!-- LEFT CUBE WRAPPER -->
+  <!-- LEFT CUBE WRAPPER -->
 <div class="cube-wrapper">
   <div class="cube-background left-cube">
     <div class="face front">$</div>
