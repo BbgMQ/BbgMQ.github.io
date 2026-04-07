@@ -113,7 +113,7 @@ function updatePieChart() {
   });
 
   if (totalExpenses === 0) {
-    chart.style.background = `\n      radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),\n      conic-gradient(#444 0% 100%)\n    `;
+    chart.style.background = `conic-gradient(#444 0% 100%)`;
     if (legend) legend.innerHTML = '';
     if (centerMsg) { centerMsg.style.display = 'block'; centerMsg.textContent = 'No expenses yet'; }
     return;
@@ -137,7 +137,7 @@ function updatePieChart() {
     startPercent = endPercent;
   });
 
-  chart.style.background = `\n    radial-gradient(circle closest-side, white 0, white 2.64%, transparent 2.64%, transparent 66%, white 0),\n    conic-gradient(${gradientStr})\n  `;
+  chart.style.background = `conic-gradient(${gradientStr})`;
 
   if (legend) legend.innerHTML = legendHTML;
 }
