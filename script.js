@@ -214,3 +214,13 @@ window.addEventListener('load', () => {
   renderColorKey();
   updateUI();
 });
+
+// Show footer on scroll
+const footer = document.querySelector('footer');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 100) {
+    footer.style.opacity = '1';
+  } else {
+    footer.style.opacity = '0';
+  }
+});

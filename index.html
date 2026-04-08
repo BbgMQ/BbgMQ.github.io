@@ -321,6 +321,29 @@ input::placeholder { color: #ffffff; opacity: 1; }
 }
 #pieLegend .legend-item { display: inline-block; margin: 6px 8px; vertical-align: middle; }
 #pieLegend .legend-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+  color: white;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+footer a {
+  color: white;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
 </style>
 </head>
 
@@ -402,7 +425,13 @@ input::placeholder { color: #ffffff; opacity: 1; }
   </div>
 </div>
 
-<script src="script.js"></script>
 </div>
+
+<footer>
+  <a href="about.html" target="_blank">More Information About The Developer</a>
+</footer>
+
+<script src="script.js"></script>
+
 </body>
 </html>
