@@ -9,6 +9,7 @@ const addButton = document.getElementById('addBtn');
 const transactionList = document.getElementById('transactionList');
 
 let transactions = [];
+let radarChart;
 
 // Category color mapping (rendered into the key)
 const CATEGORY_COLORS = {
@@ -92,6 +93,98 @@ function updateUI() {
   document.getElementById('expensesDisplay').textContent = `Expenses: $${expenses}`;
 
   updatePieChart();
+  updateRadarChart();
+}
+
+function getCategoryLabels() {
+  return Object.keys(CATEGORY_COLORS);
+}
+
+function createRadarChart() {
+  const ctx = document.getElementById('radarChart');
+  if (!ctx) return;
+
+  const categoryColors = getCategoryLabels().map(cat => CATEGORY_COLORS[cat] || '#ccc');
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: getCategoryLabels(),
+      datasets: [{
+        label: 'Expenses by category',
+        data: getCategoryLabels().map(() => 0),
+        fill: true,
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgb(54, 162, 235)',
+        pointBackgroundColor: categoryColors,
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: categoryColors,
+        pointHoverBorderColor: categoryColors,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: {
+            color: '#fff',
+            display: false
+          },
+          pointLabels: {
+            color: '#fff'
+          },
+          grid: {
+            color: 'rgba(255,255,255,0.2)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            title: function() {
+              return 'Categories';
+            },
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed.r || 0;
+              return label + ': $' + value.toFixed(2);
+            }
+          }
+        }
+      },
+      elements: {
+        line: {
+          borderWidth: 3
+        }
+      }
+    }
+  });
+}
+
+function updateRadarChart() {
+  if (!radarChart) {
+    createRadarChart();
+  }
+  if (!radarChart) return;
+
+  const totals = getCategoryLabels().reduce((acc, cat) => {
+    acc[cat] = 0;
+    return acc;
+  }, {});
+
+  transactions.forEach(t => {
+    if (t.amount < 0 && totals.hasOwnProperty(t.category)) {
+      totals[t.category] += Math.abs(t.amount);
+    }
+  });
+
+  radarChart.data.datasets[0].data = getCategoryLabels().map(cat => totals[cat]);
+  radarChart.update();
 }
 
 // CSS-based pie chart update
@@ -212,6 +305,7 @@ cubeWrappers.forEach(wrapper => {
 // Init
 window.addEventListener('load', () => {
   renderColorKey();
+  createRadarChart();
   updateUI();
 });
 

@@ -76,7 +76,7 @@ h1 {
 }
 
 /* === SECTIONS === */
-.summary, .form, .transactions {
+.summary, .transactions {
   background: rgba(255,255,255,0.05);
   padding: 20px;
   border-radius: 16px;
@@ -86,6 +86,22 @@ h1 {
   overflow: visible;
   padding-right: 320px;
   min-height: 240px;
+}
+
+.form {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 30px;
+  position: relative;
+  overflow: visible;
+  padding-right: 20px;
+  min-height: 240px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
 /* === TOTALS === */
@@ -108,7 +124,15 @@ input, select {
   margin-top: 12px;
 }
 
-input[type="number"]::-webkit-inner-spin-button { opacity: 1; filter: invert(1); }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 
 select option { background: #111; color: white; }
 
@@ -125,12 +149,19 @@ button {
 ul { list-style: none; padding: 0; }
 
 li {
-  background: rgba(255,255,255,0.08);
+  background: transparent !important;
   padding: 14px;
   border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
   margin-top: 12px;
   display: flex;
   justify-content: space-between;
+}
+
+li span {
+  background: transparent !important;
+  color: inherit;
+  padding: 0 !important;
 }
 
 .income { border-left: 5px solid #10b981; }
@@ -215,6 +246,36 @@ input::placeholder { color: #ffffff; opacity: 1; }
 }
 
 .chart-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.transaction-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.form-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form h3 {
+  margin: 0;
+}
+
+.radar-chart-box {
+  margin-top: 0;
+  width: 100%;
+  min-height: 300px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.radar-chart-box canvas {
   width: 100% !important;
   height: 100% !important;
 }
@@ -374,26 +435,33 @@ footer a:hover {
   </div>
 
   <div class="form holographic-hover">
-    <h3>Add Transaction</h3>
-    <input type="text" placeholder="Description" id="descInput">
-    <input type="number" placeholder="Amount" id="amountInput">
-    <select id="typeSelect">
-      <option disabled selected>Type</option>
-      <option>Income</option>
-      <option>Expense</option>
-    </select>
-    <select id="categorySelect">
-      <option disabled selected>Select a category</option>
-      <option>Food</option>
-      <option>Housing</option>
-      <option>Transportation</option>
-      <option>Entertainment</option>
-      <option>Utilities</option>
-      <option>Shopping</option>
-      <option>Health</option>
-      <option>Other</option>
-    </select>
-    <button id="addBtn">Add</button>
+    <div class="form-left">
+      <h3>Add Transaction</h3>
+      <div class="transaction-inputs">
+        <input type="text" placeholder="Description" id="descInput">
+        <input type="number" placeholder="Amount" id="amountInput">
+        <select id="typeSelect">
+          <option disabled selected>Type</option>
+          <option>Income</option>
+          <option>Expense</option>
+        </select>
+        <select id="categorySelect">
+          <option disabled selected>Select a category</option>
+          <option>Food</option>
+          <option>Housing</option>
+          <option>Transportation</option>
+          <option>Entertainment</option>
+          <option>Utilities</option>
+          <option>Shopping</option>
+          <option>Health</option>
+          <option>Other</option>
+        </select>
+        <button id="addBtn">Add</button>
+      </div>
+    </div>
+    <div class="radar-chart-box">
+      <canvas id="radarChart"></canvas>
+    </div>
   </div>
 
   <div class="transactions holographic-hover">
