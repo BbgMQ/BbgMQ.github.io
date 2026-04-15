@@ -3,9 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>My Portfolio</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  
+
+  <!-- Sticky Navbar -->
+  <nav>
+    <ul>
+      <li><a href="#welcome">Home</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#profile">Profile</a></li>
+      <li><a href="#social">Social</a></li>
+    </ul>
+  </nav>
+
+  <!-- Welcome Section -->
+  <section id="welcome">
+    <h1>Welcome to My Portfolio Website</h1>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <a href="file:///C:/Users/ksobo489/Documents/GitHub/budgetapp.html" target="_blank">My Project</a>
+  </section>
+
+  <!-- Profile Section -->
+  <section id="profile">
+    <h2>About Me</h2>
+    <p>I am a student learning web development. I enjoy building simple websites and improving my skills.</p>
+  </section>
+
+  <!-- Social Media Section -->
+  <section id="social">
+    <h2>Connect With Me</h2>
+    <a href="https://github.com/" target="_blank">GitHub</a><br>
+    <a href="https://linkedin.com/" target="_blank">LinkedIn</a><br>
+    <a href="https://www.codewars.com/" target="_blank">CodeWars</a>
+  </section>
+
 </body>
+<style>
+  body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Sticky Navbar */
+nav {
+  position: sticky;
+  top: 0;
+  background: #333;
+  padding: 10px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+}
+
+/* Sections */
+section {
+  padding: 40px;
+  text-align: center;
+}
+
+/* Full screen welcome */
+#welcome {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  nav ul {
+    flex-direction: column;
+  }
+}
+</style>
 </html>
